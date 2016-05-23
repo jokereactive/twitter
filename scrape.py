@@ -45,8 +45,6 @@ def get_follows(source):
 def get_user(source):
 	soup = BeautifulSoup(source,'html.parser')
 	anchor = soup.find('a',class_='account-summary')
-	#pdb.set_trace()
-	global user_id 
 	user_id = str(anchor.find('div').find('div')['data-user-id'])
 	return user_id
 
