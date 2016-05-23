@@ -1,3 +1,4 @@
+import pdb
 import sys
 import csv
 import time
@@ -16,7 +17,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def write(dic):
 	keys = dic[0].keys()
-	with open('followers.csv','wb') as fp:
+	with open(str(user_id)+'.csv','wb') as fp:
 		dict_writer = csv.DictWriter(fp,keys)
 		dict_writer.writeheader()
 		dict_writer.writerows(dic)
@@ -41,6 +42,14 @@ def get_follows(source):
 	return result
 
 
+def get_user(source):
+	soup = BeautifulSoup(source,'html.parser')
+	anchor = soup.find('a',class_='account-summary')
+	#pdb.set_trace()
+	global user_id 
+	user_id = str(anchor.find('div').find('div')['data-user-id'])
+	return user_id
+
 def get_page_source():
 
 	browser = ''
@@ -61,7 +70,8 @@ def get_page_source():
 	except:
 		print "Error"
 		browser.quit()		
-
+	global user_id
+	user_id = get_user(browser.page_source)
 	for i in range(4):
 		try:
 			run_test = WebDriverWait(browser, 120).until(EC.presence_of_element_located((By.CLASS_NAME, "notifications")))
@@ -90,7 +100,8 @@ def get_page_source():
 
 	return result
 
+user_id = 'followers'
 src = get_page_source()
 data = get_follows(src)
 write(data)
-print "Done. Please email the newly created 'followers.csv' file to anupamaa@iiitd.ac.in"
+print "Done. Please email the newly created '#{twitter-id}.csv' file to anupamaa@iiitd.ac.in"
