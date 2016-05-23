@@ -1,4 +1,3 @@
-import pdb
 import sys
 import csv
 import time
@@ -47,9 +46,7 @@ def get_page_source():
 	browser = ''
 	action = ''
 
-	#pdb.set_trace()
 	try:
-		#pdb.set_trace()
 		browser = webdriver.Chrome("lib/chromedriver-"+sys.argv[1])
 		action  = ActionChains(browser)
 		browser.get("http://www.twitter.com")
@@ -73,13 +70,18 @@ def get_page_source():
 		except Exception as e:
 			raise e
 	print "Collecting followers list...."
+
 	while True:
+		for i in range(10):
+			time.sleep(5)
+			browser.execute_script("window.scrollTo(0, document.body.scrollHeight+100);")
 		try:
-			WebDriverWait(browser,5).until(EC.visibility_of(browser.find_element_by_class_name("stream-end")))
+			WebDriverWait(browser,1).until(EC.visibility_of(browser.find_element_by_class_name("back-to-top")))
 			break
 		except Exception:
-			time.sleep(5)
-			browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+			for i in range(10):
+				time.sleep(5)
+				browser.execute_script("window.scrollTo(0, document.body.scrollHeight+100);")
 			continue
 
 	result = browser.page_source
