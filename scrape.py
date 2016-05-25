@@ -22,6 +22,14 @@ def write(dic):
 		dict_writer.writeheader()
 		dict_writer.writerows(dic)
 
+
+def get_len(source):
+	soup = BeautifulSoup(source,'html.parser')
+	stream = soup.find('div',class_="stream")
+	ol = stream.find('ol')
+	items = ol.find_all('li',class_='js-activity-follow')
+
+
 def get_follows(source):
 	soup = BeautifulSoup(source,'html.parser')
 	stream = soup.find('div',class_="stream")
@@ -79,21 +87,24 @@ def get_page_source():
 			raise e
 	print "Collecting followers list...."
 
+	initial = get_len(browser.page_source)
 	while True:
-		print "loop"
-		for i in range(10):
-			print "1"
-			time.sleep(5)
+		for i in range(3):
+			time.sleep(3)
 			browser.execute_script("window.scrollTo(0, document.body.scrollHeight+100);")
+			initial = get_len(browser.page_source)
+		if initial == get_len(browser.page_source):
+			break
 		try:
-			print "try"
 			WebDriverWait(browser,1).until(EC.visibility_of(browser.find_element_by_class_name("back-to-top")))
 			break
 		except Exception:
-			for i in range(10):
-				print "2"
-				time.sleep(5)
+			for i in range(3):
+				time.sleep(3)
 				browser.execute_script("window.scrollTo(0, document.body.scrollHeight+100);")
+				initial = get_len(browser.page_source)
+			if initial == get_len(browser.page_source):
+				break
 
 	result = browser.page_source
 
