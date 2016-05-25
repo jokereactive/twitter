@@ -1,4 +1,4 @@
-** README
+**README**
 
 1. Run the command `bash setup.sh`.
 2. Your browser should open up. 
