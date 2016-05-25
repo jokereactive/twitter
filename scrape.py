@@ -80,17 +80,20 @@ def get_page_source():
 	print "Collecting followers list...."
 
 	while True:
+		print "loop"
 		for i in range(10):
+			print "1"
 			time.sleep(5)
 			browser.execute_script("window.scrollTo(0, document.body.scrollHeight+100);")
 		try:
+			print "try"
 			WebDriverWait(browser,1).until(EC.visibility_of(browser.find_element_by_class_name("back-to-top")))
 			break
 		except Exception:
 			for i in range(10):
+				print "2"
 				time.sleep(5)
 				browser.execute_script("window.scrollTo(0, document.body.scrollHeight+100);")
-			continue
 
 	result = browser.page_source
 

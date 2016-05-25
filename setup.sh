@@ -2,10 +2,10 @@
 
 echo "Checking for a valid python installation....."
 echo "Your python version is"
-PY=`python -V`
-found=`echo $PY | grep -c Python`
+python -V
+found=`python -V |& grep -c Python`
 
-if [ $found -ne 0 ]; then
+if [ $found -ne 1 ]; then
 	echo "Please install python and restart script"
 	exit 1
 fi
@@ -13,9 +13,10 @@ fi
 echo "Checking for pip"
 echo "Your pip version is"
 PIP=`pip -V`
-found=`echo $PY | grep -c pip`
+echo $PIP
+found=`echo $PIP | grep -c pip`
 
-if [ $found -ne 0 ]; then 
+if [ $found -ne 1 ]; then 
 	echo "Please install pip and restart script"
 	exit 2
 fi
