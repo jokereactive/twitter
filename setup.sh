@@ -1,4 +1,5 @@
 #!/bin/bash
+source venv/bin/activate
 
 echo "Checking for a valid python installation....."
 echo "Your python version is"
@@ -8,17 +9,6 @@ found=`python -V |& grep -c Python`
 if [ $found -ne 1 ]; then
 	echo "Please install python and restart script"
 	exit 1
-fi
-
-echo "Checking for pip"
-echo "Your pip version is"
-PIP=`pip -V`
-echo $PIP
-found=`echo $PIP | grep -c pip`
-
-if [ $found -ne 1 ]; then 
-	echo "Please install pip and restart script"
-	exit 2
 fi
 
 echo "Installing dependencies"
@@ -45,3 +35,5 @@ elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
     echo "Microsoft 32"
     python scrape.py win32.exe
 fi
+
+deactivate
