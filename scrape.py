@@ -15,11 +15,21 @@ from selenium.common.exceptions import NoSuchAttributeException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 
-# For Headless / Works only on ubuntu
-#from pyvirtualdisplay import Display
+run_headless = True
 
-#display = Display(visible=0, size=(800, 600))
-#display.start()
+# Check if ubuntu and user wants to run headless
+if run_headless:
+	if sys.argv[1]=='l64' or sys.argv[1]=='l32':
+		print("Running Headless.")
+		# For Headless / Works only on ubuntu
+		from pyvirtualdisplay import Display
+
+		display = Display(visible=0, size=(800, 600))
+		display.start()
+	else:
+		print("Not compatible.")
+else:
+	print("Running in Browser Mode.")
 
 def write(dic, filename):
 	keys = dic[0].keys()
