@@ -45,16 +45,20 @@ def get_images(source):
 	print "Analysing imges..."
 	#pb = progressbar.ProgressBar()
 	for item in items:
-		tweet_id = item['data-item-id']
-		photo_divs = item.find_all('div',class_="AdaptiveMedia-photoContainer")
-		for photo_div in photo_divs:
-			photo_url = photo_div['data-image-url']
-			try:
-				
-				print({'tweet-id': str(tweet_id),'image-url': str(photo_url)})
+		try:
+			if(item['data-item-type']=='tweet'):
+				tweet_id = item['data-item-id']
+				photo_divs = item.find_all('div',class_="AdaptiveMedia-photoContainer")
+				for photo_div in photo_divs:
+					photo_url = photo_div['data-image-url']
+					try:
+						
+						print({'tweet-id': str(tweet_id),'image-url': str(photo_url)})
 
-				result.append({'tweet-id': str(tweet_id),'image-url': str(photo_url)})
-			except Exception:
+						result.append({'tweet-id': str(tweet_id),'image-url': str(photo_url)})
+					except Exception:
+						continue
+		except KeyError:
 				continue
 	return result
 
@@ -104,7 +108,7 @@ def get_page_source(keyword):
 
 	return result
 
-keyword = 'TNTQ3SemifinaLs'
+keyword = sys.argv[2]
 src = get_page_source(keyword)
 data = get_images(src)
 write(data, keyword)

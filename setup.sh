@@ -22,18 +22,18 @@ echo "Running scraping script"
 
 if [ "$(uname)" == "Darwin" ]; then
 	echo "Mac 32"
-    python scrape.py m32        
+    python scrape.py m32 $1        
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     if [ "$(expr substr $(uname -m) 1 3)" == "x86" ]; then
     	echo "Linux 64"
-    	python scrape.py l64        
+    	python scrape.py l64 $1       
 	elif [ "$(expr substr $(uname -m) 1 4)" == "i686" ]; then
     	echo "Linux 32"
-    	python scrape.py l32     
+    	python scrape.py l32 $1    
 	fi
 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
     echo "Microsoft 32"
-    python scrape.py win32.exe
+    python scrape.py win32.exe $1
 fi
 
 deactivate
