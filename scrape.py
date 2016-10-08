@@ -15,6 +15,12 @@ from selenium.common.exceptions import NoSuchAttributeException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 
+# For Headless / Works only on ubuntu
+#from pyvirtualdisplay import Display
+
+#display = Display(visible=0, size=(800, 600))
+#display.start()
+
 def write(dic, filename):
 	keys = dic[0].keys()
 	with open(str(filename)+'.csv','wb') as fp:
