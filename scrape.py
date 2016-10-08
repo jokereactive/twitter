@@ -15,6 +15,7 @@ from selenium.common.exceptions import NoSuchAttributeException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 
+keys_prev_length = 0
 run_headless = True
 
 # Check if ubuntu and user wants to run headless
@@ -27,17 +28,26 @@ if run_headless:
 		display = Display(visible=0, size=(800, 600))
 		display.start()
 	else:
-		print("Not compatible. You are using some OS other than Ubuntu or don't have xvfb configured.")
+		print("Not compatible. You are using some OS other than Ubuntu or don't have xvfb configured. Running in Browser Mode.")
 else:
 	print("Running in Browser Mode.")
 
 def write(dic, filename):
-	keys = dic[0].keys()
-	with open(str(filename)+'.csv','wb') as fp:
-		dict_writer = csv.DictWriter(fp,keys)
-		dict_writer.writeheader()
-		dict_writer.writerows(dic)
+	global keys_prev_length
 
+	keys = dic[0].keys()
+	print("Saving tweets. Count - "+str(len(dic)))
+	if len(dic)>keys_prev_length:
+		print("Saving "+ str(len(dic)) +" tweets to disk.")
+		keys_prev_length = len(dic)
+
+		with open(str(filename)+'.csv','wb') as fp:
+			dict_writer = csv.DictWriter(fp,keys)
+			dict_writer.writeheader()
+			dict_writer.writerows(dic)
+	
+	else:
+		print("False call to write, no new tweets to write.")
 
 def get_len(source):
 	soup = BeautifulSoup(source,'html.parser')
@@ -52,7 +62,7 @@ def get_images(source):
 	ol = stream.find('ol')
 	items = ol.find_all('li',class_='js-stream-item')
 	result = []
-	print "Analysing imges..."
+	print "Analysing images..."
 	#pb = progressbar.ProgressBar()
 	for item in items:
 		try:
@@ -62,9 +72,6 @@ def get_images(source):
 				for photo_div in photo_divs:
 					photo_url = photo_div['data-image-url']
 					try:
-						
-						print({'tweet-id': str(tweet_id),'image-url': str(photo_url)})
-
 						result.append({'tweet-id': str(tweet_id),'image-url': str(photo_url)})
 					except Exception:
 						continue
@@ -87,7 +94,8 @@ def get_page_source(keyword):
 	print "Expanding Browser...."
 
 	save_length = get_len(browser.page_source)
-	print("initial length -"+str(save_length)) 
+	print("initial length -"+str(save_length))
+	count=0
 	while True:
 		for i in range(3):
 			time.sleep(3)
@@ -104,10 +112,15 @@ def get_page_source(keyword):
 				break
 			else:
 				print("this is a different 'back to top'")
+				result = browser.page_source
+				data = get_images(result)
+				write(data,keyword)
+				count=count+1
 				save_length = current_length
 		except Exception:
 			print("didn't reach a stop! current length - "+str(get_len(browser.page_source)))
 			continue
+
 	
 	result = browser.page_source
 	
@@ -122,5 +135,6 @@ def get_page_source(keyword):
 keyword = sys.argv[2]
 src = get_page_source(keyword)
 data = get_images(src)
-write(data, keyword)
+write(data,keyword)
+
 print "Done."
