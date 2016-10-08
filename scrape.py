@@ -15,9 +15,9 @@ from selenium.common.exceptions import NoSuchAttributeException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 
-def write(dic):
+def write(dic, filename):
 	keys = dic[0].keys()
-	with open(str(user_id)+'.csv','wb') as fp:
+	with open(str(filename)+'.csv','wb') as fp:
 		dict_writer = csv.DictWriter(fp,keys)
 		dict_writer.writeheader()
 		dict_writer.writerows(dic)
@@ -27,36 +27,32 @@ def get_len(source):
 	soup = BeautifulSoup(source,'html.parser')
 	stream = soup.find('div',class_="stream")
 	ol = stream.find('ol')
-	items = ol.find_all('li',class_='js-activity-follow')
+	items = ol.find_all('li',class_='js-stream-item')
+	return len(items)
 
-
-def get_follows(source):
+def get_images(source):
 	soup = BeautifulSoup(source,'html.parser')
 	stream = soup.find('div',class_="stream")
 	ol = stream.find('ol')
-	items = ol.find_all('li',class_='js-activity-follow')
+	items = ol.find_all('li',class_='js-stream-item')
 	result = []
-	print "Analysing followers list..."
-	pb = progressbar.ProgressBar()
-	for item in pb(items):
-		dt = item.find('span',class_="_timestamp").text
-		users = item.find('ol').find_all('li')
-		for user in users:
-			anchor = user.find('a')
+	print "Analysing imges..."
+	#pb = progressbar.ProgressBar()
+	for item in items:
+		tweet_id = item['data-item-id']
+		photo_divs = item.find_all('div',class_="AdaptiveMedia-photoContainer")
+		for photo_div in photo_divs:
+			photo_url = photo_div['data-image-url']
 			try:
-				result.append({'date': str(dt),'u_id': str(anchor['data-user-id']),'u_name': str(anchor['title'])})
+				
+				print({'tweet-id': str(tweet_id),'image-url': str(photo_url)})
+
+				result.append({'tweet-id': str(tweet_id),'image-url': str(photo_url)})
 			except Exception:
 				continue
 	return result
 
-
-def get_user(source):
-	soup = BeautifulSoup(source,'html.parser')
-	anchor = soup.find('a',class_='account-summary')
-	user_id = str(anchor.find('div').find('div')['data-user-id'])
-	return user_id
-
-def get_page_source():
+def get_page_source(keyword):
 
 	browser = ''
 	action = ''
@@ -64,56 +60,46 @@ def get_page_source():
 	try:
 		browser = webdriver.Chrome("lib/chromedriver-"+sys.argv[1])
 		action  = ActionChains(browser)
-		browser.get("http://www.twitter.com")
+		browser.get("http://www.twitter.com/search?q=%23"+keyword)
 	except Exception:
 	 	print "Error occured. Check internet connectivity and try again"
 
-	action.move_to_element(browser.find_element_by_class_name("StreamsLogin")).click().perform()
-	print "Please enter your username and password in the browser...."
+	print "Expanding Browser...."
 
-	try:
-		notifications = WebDriverWait(browser, 60).until(EC.presence_of_element_located((By.CLASS_NAME, "notifications")))
-	except:
-		print "Error"
-		browser.quit()		
-	global user_id
-	user_id = get_user(browser.page_source)
-	for i in range(4):
-		try:
-			run_test = WebDriverWait(browser, 120).until(EC.presence_of_element_located((By.CLASS_NAME, "notifications")))
-			run_test.click()
-			break
-		except Exception as e:
-			raise e
-	print "Collecting followers list...."
-
-	initial = get_len(browser.page_source)
+	save_length = get_len(browser.page_source)
+	print("initial length -"+str(save_length)) 
 	while True:
-		for i in range(3):
-			time.sleep(3)
-			browser.execute_script("window.scrollTo(0, document.body.scrollHeight+100);")
-			initial = get_len(browser.page_source)
-		if initial == get_len(browser.page_source):
-			break
+		time.sleep(3)
+		browser.execute_script("window.scrollTo(0, document.body.scrollHeight+100);")
 		try:
 			WebDriverWait(browser,1).until(EC.visibility_of(browser.find_element_by_class_name("back-to-top")))
-			break
-		except Exception:
-			for i in range(3):
-				time.sleep(3)
-				browser.execute_script("window.scrollTo(0, document.body.scrollHeight+100);")
-				initial = get_len(browser.page_source)
-			if initial == get_len(browser.page_source):
-				break
+			print("reached a stop!")
+			current_length = get_len(browser.page_source)
+			print("save length -"+str(save_length))
+			print("current length -"+str(current_length))
 
+			if save_length == current_length:
+				print("no change from last time...")
+				break
+			else:
+				print("this is a different 'back to top'")
+				save_length = current_length
+		except Exception:
+			print("didn't reach a stop! current length - "+str(get_len(browser.page_source)))
+			continue
+	
 	result = browser.page_source
+	
+	#backup
+	#with open(keyword+'.html','w') as f:
+	#	f.write(result)
 
 	browser.quit()
 
 	return result
 
-user_id = 'followers'
-src = get_page_source()
-data = get_follows(src)
-write(data)
-print "Done. Please email the newly created '#{twitter-id}.csv' file to anupamaa@iiitd.ac.in"
+keyword = 'TNTQ3SemifinaLs'
+src = get_page_source(keyword)
+data = get_images(src)
+write(data, keyword)
+print "Done."
