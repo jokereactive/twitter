@@ -27,7 +27,7 @@ if run_headless:
 		display = Display(visible=0, size=(800, 600))
 		display.start()
 	else:
-		print("Not compatible.")
+		print("Not compatible. You are using some OS other than Ubuntu or don't have xvfb configured.")
 else:
 	print("Running in Browser Mode.")
 
@@ -89,8 +89,9 @@ def get_page_source(keyword):
 	save_length = get_len(browser.page_source)
 	print("initial length -"+str(save_length)) 
 	while True:
-		time.sleep(3)
-		browser.execute_script("window.scrollTo(0, document.body.scrollHeight+100);")
+		for i in range(3):
+			time.sleep(3)
+			browser.execute_script("window.scrollTo(0, document.body.scrollHeight+100);")
 		try:
 			WebDriverWait(browser,1).until(EC.visibility_of(browser.find_element_by_class_name("back-to-top")))
 			print("reached a stop!")
